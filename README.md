@@ -1,6 +1,6 @@
 # Website - Monitoreo de Calidad del Aire (Ricaurte)
 
-Este sitio es un **website estático** (HTML/CSS/JS) listo para presentar el proyecto.
+Este sitio es un **website estático online** (HTML/CSS/JS) listo para presentar el proyecto.
 
 ## Cómo abrir
 1. Descomprime el ZIP.
