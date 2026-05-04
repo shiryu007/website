@@ -8,8 +8,7 @@ Este sitio es un **website estático online** (HTML/CSS/JS) listo para presentar
 
 ## Dónde editar
 - Textos/Secciones: `index.html`
-- Estilos: `assets/css/styles.css`
-- Interacciones (menú, mapa demo, formulario demo): `assets/js/main.js`
+- Estilos e interacciones: en cada archivo HTML (`index.html`, `nosotros.html`, `mediciones.html`, `contacto.html`) dentro de sus bloques `<style>` y scripts embebidos.
 
 ## Tips rápidos
 - Cambia los nombres del equipo en la sección **Equipo**.

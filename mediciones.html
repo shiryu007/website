@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mediciones | AirSense</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png">
-    <link rel="icon" type="image/png" href="assets/favicon/favicon.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png">
+    <link rel="icon" href="favicon.ico?v=3" sizes="any">
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico?v=3">
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon/favicon-32x32.png?v=3">
+    <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon/favicon-16x16.png?v=3">
+    <link rel="apple-touch-icon" sizes="180x180" href="assets/favicon/apple-touch-icon.png?v=3">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -410,17 +412,17 @@
 
         <div class="charts-grid">
             <div class="chart-card">
-                <h4><i class="fas fa-chart-line" style="color:var(--teal-bright); margin-right:0.4rem;"></i> Tendencia por punto — últimas 7 lecturas</h4>
+                <h4><i class="fas fa-chart-line" style="color:var(--teal-bright); margin-right:0.4rem;"></i> Promedio por sesión de medición — 6 puntos</h4>
                 <canvas id="trendChart"></canvas>
             </div>
             <div class="chart-card">
-                <h4><i class="fas fa-chart-pie" style="color:var(--teal-bright); margin-right:0.4rem;"></i> Distribución de calidad</h4>
-                <canvas id="donutChart"></canvas>
+                <h4><i class="fas fa-chart-pie" style="color:var(--teal-bright); margin-right:0.4rem;"></i> Frecuencia por nivel de medición</h4>
+                <canvas id="donutChart" style="max-height:440px;"></canvas>
             </div>
         </div>
 
         <div class="chart-card" style="margin-top:2rem;">
-            <h4><i class="fas fa-chart-bar" style="color:var(--teal-bright); margin-right:0.4rem;"></i> Comparativa entre puntos (valor promedio)</h4>
+            <h4><i class="fas fa-chart-bar" style="color:var(--teal-bright); margin-right:0.4rem;"></i> Distribución de frecuencias — recuento de los 377 valores registrados</h4>
             <canvas id="barChart" style="max-height:200px;"></canvas>
         </div>
     </div>
@@ -450,15 +452,27 @@
 </footer>
 
 <script>
-    // Datos de demo — reemplaza con tus datos reales
+    // ── DATOS REALES — 377 mediciones totales, parroquia Ricaurte ──
     const puntos = [
-        { id: 1, name: 'Punto 1', location: 'Sector 4 Esquinas',                                          value: 28, trend: '↓ BAJANDO' },
-        { id: 2, name: 'Punto 2', location: 'Mercado 4 de Noviembre',                                     value: 47, trend: '→ ESTABLE' },
-        { id: 3, name: 'Punto 3', location: 'Av. 25 de Marzo y Calle Eduardo Cárdenas',                   value: 22, trend: '↓ BAJANDO' },
-        { id: 4, name: 'Punto 4', location: 'Barrio Los Cipreses: Vía Bo. El Progreso y Calle S/N',       value: 51, trend: '↑ SUBIENDO' },
-        { id: 5, name: 'Punto 5', location: 'Puente Machángara: Av. 25 de Marzo y Av. de los Migrantes',  value: 83, trend: '↑ SUBIENDO' },
-        { id: 6, name: 'Punto 6', location: 'U.E. Buena Esperanza: Calle Julia Bernal y Calle Juan Pablo II', value: 19, trend: '→ ESTABLE' },
+        { id: 1, name: 'P1', location: '4 Esquinas de Ricaurte',               value: 21, total: 63,
+          history: [20, 21, 22, 20, 21, 22, 21] },
+        { id: 2, name: 'P2', location: 'Barrio Los Cipreses',                  value: 20, total: 63,
+          history: [21, 20, 19, 21, 20, 20, 20] },
+        { id: 3, name: 'P3', location: 'Intersección Av. 25 de Marzo',         value: 21, total: 63,
+          history: [20, 21, 21, 22, 21, 21, 21] },
+        { id: 4, name: 'P4', location: 'Mercado 4 de Noviembre',               value: 20, total: 63,
+          history: [20, 19, 20, 20, 19, 20, 20] },
+        { id: 5, name: 'P5', location: 'Río Machángara',                       value: 19, total: 62,
+          history: [20, 19, 18, 19, 20, 19, 19] },
+        { id: 6, name: 'P6', location: 'U.E. Buena Esperanza',                 value: 21, total: 63,
+          history: [20, 21, 22, 21, 23, 21, 21] },
     ];
+
+    // Distribución real de frecuencias por valor (14–30)
+    const freqData = {
+        labels: ['14','15','16','17','18','19','20','21','22','23','24','25','26','27','28','30'],
+        values: [1, 2, 2, 4, 15, 95, 133, 68, 26, 9, 8, 4, 4, 3, 1, 2]
+    };
 
     function getStatus(v) {
         if (v < 35) return { label: 'Bueno', cls: 'badge-good', color: '#22c55e' };
@@ -467,7 +481,7 @@
         return { label: 'Alto', cls: 'badge-unhealthy', color: '#ef4444' };
     }
 
-    // Summary cards
+    // ── Summary cards ──
     const now = new Date();
     document.getElementById('lastUpdate').textContent = now.toLocaleString('es-EC');
 
@@ -476,82 +490,205 @@
         document.getElementById('val' + p.id).textContent = p.value;
         const stEl = document.getElementById('st' + p.id);
         stEl.textContent = s.label;
-        stEl.className = 'pt-status ' + (p.value < 35 ? 'status-good' : p.value < 80 ? 'status-moderate' : 'status-unhealthy');
+        stEl.className = 'pt-status status-good';
     });
 
-    // Colores chart
-    const colors = puntos.map(p => getStatus(p.value).color);
-    const tealShades = ['#0b4d5e','#1a7a8a','#2bb5c8','#7dd8e4','#a8e9f0','#c8f2f7'];
+    // ── Colores por punto ──
+    const ptColors = ['#0b4d5e','#2bb5c8','#f59e0b','#7dd8e4','#22c55e','#f97316'];
 
-    // Trend chart — datos históricos simulados
-    const labels = ['L-1','L-2','L-3','L-4','L-5','L-6','Ahora'];
+    // ── Gráfica 1: Tendencia por punto — valores promedio por sesión ──
+    const sessionLabels = ['Sesión 1','Sesión 2','Sesión 3','Sesión 4','Sesión 5','Sesión 6','Sesión 7'];
     const trendCtx = document.getElementById('trendChart').getContext('2d');
     new Chart(trendCtx, {
         type: 'line',
         data: {
-            labels,
+            labels: sessionLabels,
             datasets: puntos.map((p, i) => ({
-                label: p.name,
-                data: Array.from({length: 7}, () => Math.max(5, p.value + Math.round((Math.random()-0.5)*20))).concat([p.value]),
-                borderColor: tealShades[i],
-                backgroundColor: tealShades[i] + '22',
+                label: p.name + ' — ' + p.location,
+                data: p.history,
+                borderColor: ptColors[i],
+                backgroundColor: ptColors[i] + '18',
                 tension: 0.4,
-                pointRadius: 3,
-                borderWidth: 2,
+                pointRadius: 4,
+                pointHoverRadius: 6,
+                borderWidth: 2.5,
             }))
         },
         options: {
             responsive: true,
-            plugins: { legend: { position: 'bottom', labels: { font: { family: 'DM Sans' }, boxWidth: 12 } } },
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { family: 'DM Sans', size: 11 }, boxWidth: 14, padding: 16 } },
+                tooltip: { mode: 'index', intersect: false }
+            },
             scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                y: {
+                    min: 14, max: 32,
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    title: { display: true, text: 'Valor (raw MQ-135)', font: { family: 'DM Sans', size: 11 }, color: '#3a6370' }
+                },
                 x: { grid: { display: false } }
             }
         }
     });
 
-    // Donut chart
-    const catCounts = [0,0,0,0];
-    puntos.forEach(p => {
-        if (p.value < 35) catCounts[0]++;
-        else if (p.value < 55) catCounts[1]++;
-        else if (p.value < 80) catCounts[2]++;
-        else catCounts[3]++;
-    });
+    // ── Gráfica 2: Pastel con líneas guía por nivel ──
+    const donutColors = [
+        '#c8f2f7','#b0edf5','#90e4f0','#7dd8e4','#60cce0','#44bfda',
+        '#2bb5c8','#1fa8bc','#1a7a8a','#166b78','#125c68','#0e4e58',
+        '#0b4d5e','#09414f','#073540','#052a31'
+    ];
+
+    const leaderLinesPlugin = {
+        id: 'leaderLines',
+        afterDraw(chart) {
+            const { ctx } = chart;
+            const meta = chart.getDatasetMeta(0);
+            const dataset = chart.data.datasets[0];
+            const chartLabels = chart.data.labels;
+            const colors = dataset.backgroundColor;
+            const total = dataset.data.reduce((a, b) => a + b, 0);
+
+            // Build info for each slice
+            const items = meta.data.map((arc, i) => {
+                const angle = (arc.startAngle + arc.endAngle) / 2;
+                const outerR = arc.outerRadius;
+                const cx = arc.x, cy = arc.y;
+                const r1 = outerR + 6;
+                const r2 = outerR + 26;
+                const x1 = cx + r1 * Math.cos(angle);
+                const y1 = cy + r1 * Math.sin(angle);
+                const rawX2 = cx + r2 * Math.cos(angle);
+                const rawY2 = cy + r2 * Math.sin(angle);
+                const side = Math.cos(angle) >= 0 ? 1 : -1;
+                return { i, angle, x1, y1, x2: rawX2, y2: rawY2, side,
+                         color: colors[i], label: chartLabels[i],
+                         pct: dataset.data[i] / total };
+            });
+
+            // Split by side, sort by Y, then spread to avoid overlap
+            const minGap = 13;
+            function spreadY(group) {
+                group.sort((a, b) => a.y2 - b.y2);
+                // Forward pass (push down)
+                for (let k = 1; k < group.length; k++) {
+                    if (group[k].y2 - group[k-1].y2 < minGap)
+                        group[k].y2 = group[k-1].y2 + minGap;
+                }
+                // Backward pass (push up) to re-center
+                for (let k = group.length - 2; k >= 0; k--) {
+                    if (group[k+1].y2 - group[k].y2 < minGap)
+                        group[k].y2 = group[k+1].y2 - minGap;
+                }
+            }
+
+            const rightItems = items.filter(d => d.side > 0);
+            const leftItems  = items.filter(d => d.side < 0);
+            spreadY(rightItems);
+            spreadY(leftItems);
+
+            // Draw all
+            ctx.save();
+            [...rightItems, ...leftItems].forEach(d => {
+                const horizLen = 16;
+                const x3 = d.x2 + d.side * horizLen;
+                const y3 = d.y2;
+
+                // Connector line: arc edge → elbow → horizontal
+                ctx.beginPath();
+                ctx.moveTo(d.x1, d.y1);
+                ctx.lineTo(d.x2, d.y2);
+                ctx.lineTo(x3, y3);
+                ctx.strokeStyle = d.color;
+                ctx.lineWidth = 1.4;
+                ctx.lineJoin = 'round';
+                ctx.stroke();
+
+                // Small dot at elbow
+                ctx.beginPath();
+                ctx.arc(d.x2, d.y2, 2.5, 0, Math.PI * 2);
+                ctx.fillStyle = d.color;
+                ctx.fill();
+
+                // Label
+                ctx.font = '600 10px "Exo 2", sans-serif';
+                ctx.fillStyle = '#0d2b33';
+                ctx.textAlign = d.side > 0 ? 'left' : 'right';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(d.label, x3 + d.side * 4, y3);
+            });
+            ctx.restore();
+        }
+    };
+
     const donutCtx = document.getElementById('donutChart').getContext('2d');
     new Chart(donutCtx, {
-        type: 'doughnut',
+        type: 'pie',
         data: {
-            labels: ['Bueno','Moderado','Poco saludable','Alto'],
-            datasets: [{ data: catCounts, backgroundColor: ['#22c55e','#f59e0b','#f97316','#ef4444'], borderWidth: 0 }]
+            labels: freqData.labels.map(l => 'Nivel ' + l),
+            datasets: [{
+                data: freqData.values,
+                backgroundColor: donutColors,
+                borderWidth: 2,
+                borderColor: '#fff',
+                hoverOffset: 8
+            }]
         },
         options: {
             responsive: true,
-            cutout: '65%',
-            plugins: { legend: { position: 'bottom', labels: { font: { family: 'DM Sans' }, boxWidth: 12 } } }
-        }
+            layout: { padding: { top: 30, bottom: 30, left: 80, right: 80 } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: ctx => ` ${ctx.raw} lecturas (${((ctx.raw/377)*100).toFixed(1)}%)`
+                    }
+                }
+            }
+        },
+        plugins: [leaderLinesPlugin]
     });
 
-    // Bar chart
+    // ── Gráfica 3: Frecuencia de valores registrados (distribución real) ──
     const barCtx = document.getElementById('barChart').getContext('2d');
     new Chart(barCtx, {
         type: 'bar',
         data: {
-            labels: puntos.map(p => p.name + '\n' + p.location),
+            labels: freqData.labels,
             datasets: [{
-                label: 'Valor promedio (raw)',
-                data: puntos.map(p => p.value),
-                backgroundColor: colors,
-                borderRadius: 6,
+                label: 'Número de lecturas',
+                data: freqData.values,
+                backgroundColor: freqData.values.map(v => {
+                    if (v >= 100) return '#0b4d5e';
+                    if (v >= 50)  return '#1a7a8a';
+                    if (v >= 20)  return '#2bb5c8';
+                    if (v >= 10)  return '#7dd8e4';
+                    return '#a8e9f0';
+                }),
+                borderRadius: 5,
                 borderSkipped: false,
             }]
         },
         options: {
             responsive: true,
-            plugins: { legend: { display: false } },
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        title: ctx => 'Nivel de contaminación: ' + ctx[0].label,
+                        label: ctx => ` ${ctx.raw} lecturas (${((ctx.raw/377)*100).toFixed(1)}% del total)`
+                    }
+                }
+            },
             scales: {
-                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
-                x: { grid: { display: false } }
+                y: {
+                    beginAtZero: true,
+                    grid: { color: 'rgba(0,0,0,0.05)' },
+                    title: { display: true, text: 'Número de lecturas', font: { family: 'DM Sans', size: 11 }, color: '#3a6370' }
+                },
+                x: {
+                    grid: { display: false },
+                    title: { display: true, text: 'Nivel de contaminación (valor raw)', font: { family: 'DM Sans', size: 11 }, color: '#3a6370' }
+                }
             }
         }
     });
