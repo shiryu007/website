@@ -1,418 +1,754 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Monitoreo de Calidad del Aire | Ricaurte</title>
-  <meta name="description" content="Proyecto escolar: dispositivo de monitoreo de calidad del aire con sensor MQ-135 y visualización en mapa digital." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="assets/css/styles.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirSense | Monitoreo de Calidad del Aire</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --teal-dark: #0b4d5e;
+            --teal-mid: #1a7a8a;
+            --teal-bright: #2bb5c8;
+            --teal-light: #7dd8e4;
+            --bg-light: #f0f9fb;
+            --text-dark: #0d2b33;
+            --text-mid: #3a6370;
+            --white: #ffffff;
+            --accent: #e8f7f9;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--white);
+            color: var(--text-dark);
+        }
+
+        /* NAV */
+        nav {
+            background: var(--teal-dark);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 0 2rem;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 20px rgba(11,77,94,0.4);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .nav-brand img.isotipo {
+            height: 38px;
+            width: auto;
+            mix-blend-mode: screen;
+        }
+
+        .nav-brand img.logotipo {
+            height: 26px;
+            width: auto;
+            mix-blend-mode: screen;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--teal-light);
+        }
+
+        .nav-social {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-social a {
+            color: rgba(255,255,255,0.7);
+            font-size: 1.1rem;
+            transition: color 0.2s, transform 0.2s;
+            text-decoration: none;
+        }
+
+        .nav-social a:hover {
+            color: var(--teal-light);
+            transform: scale(1.15);
+        }
+
+        /* HERO */
+        .hero {
+            background: url('hero-banner.png') center center / cover no-repeat;
+            min-height: 88vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: 5rem 2rem;
+        }
+
+        /* overlay: izquierda opaca para leer el texto, derecha transparente para ver el dispositivo */
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                100deg,
+                rgba(11,60,74,0.82) 0%,
+                rgba(11,60,74,0.55) 45%,
+                rgba(11,60,74,0.0) 75%
+            );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .hero::before { display: none; }
+        .hero-grid { display: none; }
+
+        .hero-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+            /* solo columna de texto, sin imagen a la derecha */
+            display: block;
+            width: 100%;
+        }
+
+        .hero-text {
+            max-width: 560px;
+        }
+
+        .hero-text h1 {
+            font-family: 'Exo 2', sans-serif;
+            font-size: clamp(2.8rem, 5vw, 4.2rem);
+            font-weight: 900;
+            color: var(--white);
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-text h1 span {
+            color: var(--teal-light);
+        }
+
+        .hero-text p {
+            font-size: 1.15rem;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.7;
+            margin-bottom: 2.5rem;
+            max-width: 480px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: var(--teal-light);
+            color: var(--teal-dark);
+            padding: 0.85rem 2rem;
+            border-radius: 6px;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: var(--white);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            border: 2px solid rgba(255,255,255,0.5);
+            color: var(--white);
+            padding: 0.85rem 2rem;
+            border-radius: 6px;
+            font-family: 'Exo 2', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--teal-light);
+            background: rgba(255,255,255,0.1);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-16px); }
+        }
+
+        /* OBJETIVO */
+        .section {
+            padding: 5rem 2rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-tag {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--teal-mid);
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title {
+            font-family: 'Exo 2', sans-serif;
+            font-size: clamp(2rem, 3.5vw, 2.8rem);
+            font-weight: 800;
+            color: var(--teal-dark);
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .objetivo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .objetivo-text p {
+            font-size: 1.05rem;
+            color: var(--text-mid);
+            line-height: 1.8;
+            margin-bottom: 1.2rem;
+        }
+
+        .objetivo-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .stat-card {
+            background: var(--bg-light);
+            border: 1px solid rgba(43,181,200,0.2);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(43,181,200,0.15);
+        }
+
+        .stat-card .num {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--teal-mid);
+            display: block;
+        }
+
+        .stat-card p {
+            font-size: 0.82rem;
+            color: var(--text-mid);
+            margin-top: 0.3rem;
+            font-weight: 500;
+        }
+
+        /* PLANES */
+        .planes-section {
+            background: var(--teal-dark);
+            padding: 5rem 2rem;
+        }
+
+        .planes-section .section-title {
+            color: var(--white);
+        }
+
+        .planes-section .section-tag {
+            color: var(--teal-light);
+        }
+
+        .planes-section .section-intro {
+            color: rgba(255,255,255,0.7);
+            font-size: 1.05rem;
+            max-width: 560px;
+            line-height: 1.7;
+            margin-bottom: 3.5rem;
+        }
+
+        .planes-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .plan-card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: transform 0.25s, border-color 0.25s, background 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--teal-bright);
+            background: rgba(43,181,200,0.1);
+        }
+
+        .plan-card.featured {
+            border-color: var(--teal-bright);
+            background: rgba(43,181,200,0.12);
+        }
+
+        .plan-badge {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.2rem;
+            background: var(--teal-light);
+            color: var(--teal-dark);
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 0.25rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        .plan-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(43,181,200,0.2);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--teal-light);
+            margin-bottom: 1.5rem;
+        }
+
+        .plan-name {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+        }
+
+        .plan-tagline {
+            color: var(--teal-light);
+            font-size: 0.85rem;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+        }
+
+        .plan-features {
+            list-style: none;
+            space-y: 0.6rem;
+        }
+
+        .plan-features li {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.7rem;
+            color: rgba(255,255,255,0.75);
+            font-size: 0.9rem;
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+
+        .plan-features li i {
+            color: var(--teal-bright);
+            margin-top: 0.15rem;
+            flex-shrink: 0;
+        }
+
+        .plan-features li.disabled {
+            opacity: 0.35;
+        }
+
+        .plan-features li.disabled i {
+            color: rgba(255,255,255,0.3);
+        }
+
+        /* PRECIO */
+        .plan-price {
+            margin: 1.4rem 0 0.3rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .plan-price .amount {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 2.4rem;
+            font-weight: 900;
+            color: var(--white);
+            line-height: 1;
+        }
+
+        .plan-price .amount sup {
+            font-size: 1rem;
+            font-weight: 700;
+            vertical-align: super;
+            margin-right: 0.1rem;
+        }
+
+        .plan-price .period {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+            margin-top: 0.2rem;
+        }
+
+        .plan-km {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(43,181,200,0.12);
+            border: 1px solid rgba(43,181,200,0.25);
+            border-radius: 8px;
+            padding: 0.55rem 0.8rem;
+            margin-top: 0.8rem;
+            font-size: 0.78rem;
+            color: var(--teal-light);
+            font-weight: 500;
+            line-height: 1.4;
+        }
+
+        .plan-km i {
+            color: var(--teal-bright);
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--text-dark);
+            color: rgba(255,255,255,0.7);
+            padding: 3rem 2rem 1.5rem;
+        }
+
+        .footer-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-brand img.logotipo {
+            height: 22px;
+            mix-blend-mode: screen;
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-brand p {
+            font-size: 0.85rem;
+            max-width: 280px;
+            line-height: 1.6;
+        }
+
+        .footer-social {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .footer-social a {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+            text-decoration: none;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .footer-social a:hover {
+            border-color: var(--teal-bright);
+            color: var(--teal-light);
+        }
+
+        .footer-links h4 {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--white);
+            margin-bottom: 1rem;
+        }
+
+        .footer-links ul {
+            list-style: none;
+        }
+
+        .footer-links ul li {
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-links ul li a {
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links ul li a:hover {
+            color: var(--teal-light);
+        }
+
+        .footer-bottom {
+            max-width: 1100px;
+            margin: 2rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            text-align: center;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 768px) {
+            .objetivo-grid, .planes-grid { grid-template-columns: 1fr; }
+            .objetivo-stats { grid-template-columns: 1fr 1fr; }
+            .nav-links { display: none; }
+            .hero-text { max-width: 100%; }
+        }
+    </style>
 </head>
 <body>
-  <header class="site-header">
-    <div class="container header-inner">
-      <a class="brand" href="#inicio" aria-label="Ir a inicio">
-        <span class="brand-mark" aria-hidden="true"></span>
-        <span class="brand-text">
-          <strong>Calidad del Aire</strong>
-          <span>Ricaurte • 2025 – 2026 </span>
-        </span>
-      </a>
 
-      <button class="nav-toggle" id="navToggle" aria-label="Abrir menú" aria-expanded="false" aria-controls="siteNav">
-        <span></span><span></span><span></span>
-      </button>
-
-      <nav class="site-nav" id="siteNav">
-        <a href="#proyecto">Proyecto</a>
-        <a href="#metodologia">Metodología</a>
-        <a href="#resultados">Resultados</a>
-        <a href="#equipo">Equipo</a>
-        <a href="#contacto" class="btn btn-sm">Contacto</a>
-      </nav>
+<nav>
+    <a href="index.html" class="nav-brand">
+        <img src="Airsense-iso.png" class="isotipo" alt="AirSense isotipo">
+        <img src="Airsense-logo.png" class="logotipo" alt="AirSense">
+    </a>
+    <ul class="nav-links">
+        <li><a href="index.html" class="active">Inicio</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="mediciones.html">Mediciones</a></li>
+        <li><a href="contacto.html">Contacto</a></li>
+    </ul>
+    <div class="nav-social">
+        <a href="https://www.instagram.com/airsense_ricaurte/" target="_blank" title="Instagram"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.facebook.com/profile.php?id=61586188710664" target="_blank" title="Facebook"><i class="fab fa-facebook-f"></i></a>
     </div>
-  </header>
+</nav>
 
-  <!-- Hero -->
-  <main id="inicio" class="main">
-    <section class="hero">
-      <div class="container hero-grid">
-        <div class="hero-copy">
-          <p class="pill">
-            <span class="dot"></span>
-            Dispositivo con sensor <strong>MQ-135</strong> • Registro de datos • Mapa digital
-          </p>
-          <h1>Monitoreo de calidad del aire en <span class="grad">Ricaurte</span>, en tiempo real</h1>
-          <p class="lead">
-            Medimos contaminación por gases y polvo en distintas zonas, analizamos lecturas y las representamos
-            en un mapa para apoyar la conciencia ambiental y la toma de decisiones.
-          </p>
-
-          <div class="hero-actions">
-            <a class="btn" href="#proyecto">Ver el proyecto</a>
-            <a class="btn btn-ghost" href="#resultados">Explorar resultados</a>
-          </div>
-
-          <div class="hero-stats">
-            <div class="stat">
-              <div class="stat-num">MQ-135</div>
-              <div class="stat-label">Sensor de gases</div>
+<!-- HERO -->
+<header class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+        <div class="hero-text">
+            <p class="section-tag" style="color:var(--teal-light);">Macroproyecto 2026 · Parroquia Ricaurte, Cuenca</p>
+            <h1>Respira con <span>datos reales</span></h1>
+            <p>AirSense mide CO₂, NH₃, óxidos de nitrógeno, benceno y humo en tiempo real en la parroquia Ricaurte, para que la comunidad conozca y actúe frente a la contaminación del aire.</p>
+            <div class="hero-buttons">
+                <a href="mediciones.html" class="btn-primary">Ver Mediciones</a>
+                <a href="nosotros.html" class="btn-outline">Sobre Nosotros</a>
             </div>
-            <div class="stat">
-              <div class="stat-num">Zonas</div>
-              <div class="stat-label">Múltiples puntos</div>
-            </div>
-            <div class="stat">
-              <div class="stat-num">Mapa</div>
-              <div class="stat-label">Visualización simple</div>
-            </div>
-          </div>
         </div>
-
-        <div class="hero-card" aria-label="Tarjeta ilustrativa">
-          <div class="card-top">
-            <div class="card-title">
-              <h2>Panel de lectura</h2>
-              <p class="muted">Ejemplo visual (demo)</p>
-            </div>
-            <div class="badge">ACTIVO</div>
-          </div>
-
-          <div class="gauge">
-            <div class="gauge-label">Índice estimado</div>
-            <div class="gauge-value"><span id="gaugeValue">68</span><small>/100</small></div>
-            <div class="gauge-bar">
-              <div class="gauge-fill" id="gaugeFill" style="width: 68%"></div>
-            </div>
-            <div class="gauge-legend">
-              <span>Mejor</span>
-              <span>Peor</span>
-            </div>
-          </div>
-
-          <div class="mini-grid">
-            <div class="mini">
-              <div class="mini-k">Zona</div>
-              <div class="mini-v" id="zoneName">Centro</div>
-            </div>
-            <div class="mini">
-              <div class="mini-k">Hora</div>
-              <div class="mini-v" id="hourNow">--:--</div>
-            </div>
-            <div class="mini">
-              <div class="mini-k">Estado</div>
-              <div class="mini-v" id="qualityTag">Moderado</div>
-            </div>
-          </div>
-
-          <p class="small muted">
-            Nota: este panel es ilustrativo para la presentación del proyecto.
-          </p>
-        </div>
-      </div>
-
-      <div class="hero-bg" aria-hidden="true">
-        <svg viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg" role="img">
-          <defs>
-            <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1">
-              <stop offset="0" stop-color="var(--c-accent)"/>
-              <stop offset="1" stop-color="var(--c-accent2)"/>
-            </linearGradient>
-            <filter id="blur" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="55"/>
-            </filter>
-          </defs>
-          <circle cx="220" cy="160" r="130" fill="url(#g1)" opacity="0.55" filter="url(#blur)"/>
-          <circle cx="980" cy="130" r="160" fill="url(#g1)" opacity="0.45" filter="url(#blur)"/>
-          <circle cx="760" cy="460" r="190" fill="url(#g1)" opacity="0.35" filter="url(#blur)"/>
-        </svg>
-      </div>
-    </section>
-
-    <!-- Seccion del proyecto -->
-    <section id="proyecto" class="section">
-      <div class="container">
-        <div class="section-head">
-          <h2>Sobre el proyecto</h2>
-          <p class="muted">
-            Desarrollo de un dispositivo de monitoreo de calidad del aire en la parroquia Ricaurte (Cuenca).
-          </p>
-        </div>
-
-        <div class="cards-3">
-          <article class="card">
-            <h3>Problemática</h3>
-            <p>
-              El aire se ve afectado por gases de vehículos, quema de basura y polvo en suspensión.
-              Falta monitoreo continuo para identificar picos de contaminación y zonas críticas.
-            </p>
-          </article>
-
-          <article class="card">
-            <h3>Objetivo</h3>
-            <p>
-              Medir contaminación con MQ-135, registrar lecturas por zona y horario, y representar resultados
-              en un mapa digital para facilitar comprensión y conciencia ambiental.
-            </p>
-          </article>
-
-          <article class="card">
-            <h3>Impacto</h3>
-            <p>
-              Con evidencia real se pueden promover campañas, charlas e infografías para reducir prácticas
-              contaminantes (quema de basura, plásticos, etc.).
-            </p>
-          </article>
-        </div>
-
-        <div class="callout">
-          <div>
-            <h3>Entregables principales</h3>
-            <ul class="checklist">
-              <li>Dispositivo funcional (sensor MQ-135 + estructura).</li>
-              <li>Registro de datos por zona y horario.</li>
-              <li>Mapa manual/digital con puntos de medición.</li>
-              <li>Informe con tablas, gráficas y conclusiones.</li>
-            </ul>
-          </div>
-          <a class="btn btn-ghost" href="#contacto">Solicitar información</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- Metodologia -->
-    <section id="metodologia" class="section section-alt">
-      <div class="container">
-        <div class="section-head">
-          <h2>Metodología</h2>
-          <p class="muted">Pasos claros y replicables para el trabajo de campo y el análisis de datos.</p>
-        </div>
-
-        <div class="timeline">
-          <div class="step">
-            <div class="step-num">1</div>
-            <div class="step-body">
-              <h3>Construcción del dispositivo</h3>
-              <p>Ensamblaje del MQ-135, microcontrolador, alimentación y carcasa.</p>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">2</div>
-            <div class="step-body">
-              <h3>Calibración y pruebas</h3>
-              <p>Verificación de lectura estable y registro consistente en diferentes condiciones.</p>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">3</div>
-            <div class="step-body">
-              <h3>Trabajo de campo</h3>
-              <p>Lecturas en varios puntos de Ricaurte, en distintos horarios y días.</p>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">4</div>
-            <div class="step-body">
-              <h3>Organización y análisis</h3>
-              <p>Tablas, promedios, comparación por zona y detección de picos.</p>
-            </div>
-          </div>
-
-          <div class="step">
-            <div class="step-num">5</div>
-            <div class="step-body">
-              <h3>Mapa y comunicación</h3>
-              <p>Mapa manual/digital + acciones educativas para la comunidad.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Visualizacion de resultados -->
-    <section id="resultados" class="section">
-      <div class="container">
-        <div class="section-head">
-          <h2>Resultados y visualización</h2>
-          <p class="muted">Demo de puntos de medición (puedes reemplazar por tus datos reales).</p>
-        </div>
-
-        <div class="results-grid">
-          <div class="map-card">
-            <div class="map-head">
-              <h3>Mapa de zonas (demo)</h3>
-              <p class="muted small">Haz clic en un punto para ver el valor.</p>
-            </div>
-
-            <div class="map" id="map">
-              <div class="pin" data-zone="Centro" data-value="68" style="left: 52%; top: 44%"></div>
-              <div class="pin" data-zone="Vía Principal" data-value="82" style="left: 70%; top: 30%"></div>
-              <div class="pin" data-zone="Escuela" data-value="55" style="left: 34%; top: 38%"></div>
-              <div class="pin" data-zone="Barrio Norte" data-value="73" style="left: 38%; top: 62%"></div>
-              <div class="pin" data-zone="Zona Rural" data-value="41" style="left: 20%; top: 72%"></div>
-            </div>
-
-            <div class="map-legend">
-              <span class="legend-pill"><i class="legend-dot"></i> Punto de medición</span>
-              <span class="muted small">Escala: 0 (mejor) – 100 (peor)</span>
-            </div>
-          </div>
-
-          <aside class="panel-card">
-            <h3>Lectura seleccionada</h3>
-            <p class="muted">Zona: <strong id="selZone">Centro</strong></p>
-
-            <div class="meter">
-              <div class="meter-row">
-                <span>Índice estimado</span>
-                <strong id="selValue">68</strong>
-              </div>
-              <div class="meter-bar">
-                <div class="meter-fill" id="selFill" style="width: 68%"></div>
-              </div>
-              <p class="small muted" id="selLabel">Moderado — se recomienda reducir exposición prolongada.</p>
-            </div>
-
-            <div class="tips">
-              <h4>Acciones sugeridas</h4>
-              <ul>
-                <li>Evitar quema de basura y plásticos.</li>
-                <li>Promover reciclaje y separación de desechos.</li>
-                <li>Preferir transporte compartido o caminata en tramos cortos.</li>
-              </ul>
-            </div>
-          </aside>
-        </div>
-      </div>
-    </section>
-
-    <!-- Integrantes o equipo 4: -->
-    <section id="equipo" class="section section-alt">
-      <div class="container">
-        <div class="section-head">
-          <h2>Equipo</h2>
-          <p class="muted">Grupo #4 — Segundo de Bachillerato en Informática “A” (2025–2026)</p>
-        </div>
-
-        <div class="team-grid">
-          <div class="person">
-            <div class="avatar">CB</div>
-            <div>
-              <h3>Christopher David Barros López</h3>
-              <p class="muted small">Diseño y Desarrollo Web</p>
-            </div>
-          </div>
-          <div class="person">
-            <div class="avatar">JF</div>
-            <div>
-              <h3>Jostin Steven Fernández Heras</h3>
-              <p class="muted small">Sistemas Operativos y Redes</p>
-            </div>
-          </div>
-          <div class="person">
-            <div class="avatar">SH</div>
-            <div>
-              <h3>Scarlet Rashel Hernández Morocho</h3>
-              <p class="muted small">Soporte técnico</p>
-            </div>
-          </div>
-          <div class="person">
-            <div class="avatar">MP</div>
-            <div>
-              <h3>Michael Steven Pozo Coronel</h3>
-              <p class="muted small">Programación estructurada</p>
-            </div>
-          </div>
-          <div class="person">
-            <div class="avatar">ER</div>
-            <div>
-              <h3>Evan David Rendon Bravo</h3>
-              <p class="muted small">Programación orientada a objetos</p>
-            </div>
-          </div>
-          <div class="person">
-            <div class="avatar">AN</div>
-            <div>
-              <h3>Ariel Fabricio Niola Mejia</h3>
-              <p class="muted small">Publicidad digital • Estadística financiera</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="teachers">
-          <h3>Docentes guía</h3>
-          <div class="chips">
-            <span class="chip">Ing. Jaime Izquierdo</span>
-            <span class="chip">Ing. Juan Bueno</span>
-            <span class="chip">Mst. Adrián Coronel</span>
-            <span class="chip">Tnglo. Pablo Crespo</span>
-            <span class="chip">Dis. Sebastián Bravo</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Contactos (Si llega a ser necesario añadi esta area) -->
-    <section id="contacto" class="section">
-      <div class="container">
-        <div class="section-head">
-          <h2>Contacto</h2>
-          <p class="muted">Formulario simple para la presentación (no envía emails por sí solo).</p>
-        </div>
-
-        <div class="contact-grid">
-          <form class="form" id="contactForm">
-            <div class="field">
-              <label for="name">Nombre</label>
-              <input id="name" name="name" type="text" placeholder="Tu nombre" required />
-            </div>
-            <div class="field">
-              <label for="email">Correo</label>
-              <input id="email" name="email" type="email" placeholder="tucorreo@ejemplo.com" required />
-            </div>
-            <div class="field">
-              <label for="msg">Mensaje</label>
-              <textarea id="msg" name="msg" rows="5" placeholder="Escribe tu mensaje..." required></textarea>
-            </div>
-
-            <button class="btn" type="submit">Enviar</button>
-            <p class="small muted" id="formNote">Se mostrará un aviso de confirmación.</p>
-          </form>
-
-          <div class="contact-card">
-            <h3>Datos del proyecto</h3>
-            <ul class="info">
-              <li><strong>Tema:</strong> Monitoreo de calidad del aire</li>
-              <li><strong>Ubicación:</strong> Parroquia Ricaurte, Cuenca</li>
-              <li><strong>Periodo:</strong> 2025–2026</li>
-              <li><strong>Sensor:</strong> MQ-135</li>
-            </ul>
-
-            
-          </div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Pie de pagina -->
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p>© 2025 – 2026 • Grupo #4 • Proyecto Integrador</p>
-      <div class="footer-links">
-        <a href="#inicio">Inicio</a>
-        <a href="#proyecto">Proyecto</a>
-        <a href="#metodologia">Metodología</a>
-        <a href="#equipo">Equipo</a>
-      </div>
     </div>
-  </footer>
+</header>
 
-  <script src="assets/js/main.js"></script>
+<!-- OBJETIVO -->
+<section class="section" id="objetivo">
+    <div class="container">
+        <div class="objetivo-grid">
+            <div class="objetivo-text">
+                <p class="section-tag">Objetivo General</p>
+                <h2 class="section-title">Monitoreo de calidad del aire en la parroquia Ricaurte</h2>
+                <p>Diseñar y construir un dispositivo portátil de monitoreo de calidad del aire para medir en tiempo real el nivel de contaminación atmosférica en distintos sectores de la parroquia Ricaurte.</p>
+                <p>En Ricaurte el aire se ve contaminado por una combinación de gases de los vehículos, humos de quemas de basura y una persistente capa de polvo en suspensión. No existe un monitoreo continuo que permita medir con precisión la gravedad del problema ni identificar los momentos del día en que los niveles se disparan.</p>
+                <a href="mediciones.html" class="btn-primary" style="display:inline-block; margin-top:1rem;">Ver mapa de mediciones →</a>
+            </div>
+            <div class="objetivo-stats">
+                <div class="stat-card">
+                    <span class="num">6</span>
+                    <p>Puntos de medición en Ricaurte</p>
+                </div>
+                <div class="stat-card">
+                    <span class="num">MQ-135</span>
+                    <p>Sensor calibrado empíricamente</p>
+                </div>
+                <div class="stat-card">
+                    <span class="num">3D</span>
+                    <p>Carcasa impresa en 3D</p>
+                </div>
+                <div class="stat-card">
+                    <span class="num">100%</span>
+                    <p>Operación con batería autónoma</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- PLANES -->
+<section class="planes-section" id="planes">
+    <div class="container">
+        <p class="section-tag">Paquetes de Servicio</p>
+        <h2 class="section-title">Elige tu nivel de análisis</h2>
+        <p class="section-intro">Ofrecemos tres niveles de servicio adaptados a distintas necesidades, desde mediciones básicas hasta planes de mejora completos.</p>
+
+        <div class="planes-grid">
+            <!-- BÁSICO -->
+            <div class="plan-card">
+                <div class="plan-icon"><i class="fas fa-wind"></i></div>
+                <div class="plan-name">Básico</div>
+                <div class="plan-tagline">Solo mediciones</div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check"></i> Servicio de medición con el dispositivo AirSense en la ubicación del cliente</li>
+                    <li><i class="fas fa-check"></i> Informe con los datos obtenidos en las fechas de medición</li>
+                    <li><i class="fas fa-check"></i> Clasificación de calidad: Bueno / Moderado / Alto</li>
+                    <li class="disabled"><i class="fas fa-times"></i> Gráficas estadísticas de los datos recolectados</li>
+                    <li class="disabled"><i class="fas fa-times"></i> Medidas de tendencia a lo largo de las mediciones</li>
+                    <li class="disabled"><i class="fas fa-times"></i> Planes de mejora ambiental personalizados</li>
+                </ul>
+                <div class="plan-price">
+                    <div class="amount"><sup>$</sup>8.13</div>
+                    <div class="period">precio base del servicio</div>
+                </div>
+                <div class="plan-km">
+                    <i class="fas fa-route"></i>
+                    <span>+ $1.50 por cada kilómetro recorrido hasta la ubicación del cliente</span>
+                </div>
+            </div>
+
+            <!-- MEDIUM -->
+            <div class="plan-card featured">
+                <div class="plan-badge">Popular</div>
+                <div class="plan-icon"><i class="fas fa-chart-line"></i></div>
+                <div class="plan-name">Medium</div>
+                <div class="plan-tagline">Mediciones + Estadísticas</div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check"></i> Servicio de medición con el dispositivo AirSense en la ubicación del cliente</li>
+                    <li><i class="fas fa-check"></i> Informe con los datos obtenidos en las fechas de medición</li>
+                    <li><i class="fas fa-check"></i> Clasificación de calidad: Bueno / Moderado / Alto</li>
+                    <li><i class="fas fa-check"></i> Gráficas estadísticas de los datos recolectados</li>
+                    <li><i class="fas fa-check"></i> Medidas de tendencia a lo largo de las mediciones</li>
+                    <li class="disabled"><i class="fas fa-times"></i> Planes de mejora ambiental personalizados</li>
+                </ul>
+                <div class="plan-price">
+                    <div class="amount"><sup>$</sup>11.13</div>
+                    <div class="period">precio base del servicio</div>
+                </div>
+                <div class="plan-km">
+                    <i class="fas fa-route"></i>
+                    <span>+ $1.50 por cada kilómetro recorrido hasta la ubicación del cliente</span>
+                </div>
+            </div>
+
+            <!-- PREMIUM -->
+            <div class="plan-card">
+                <div class="plan-icon"><i class="fas fa-leaf"></i></div>
+                <div class="plan-name">Premium</div>
+                <div class="plan-tagline">Mediciones + Estadísticas + Mejora</div>
+                <ul class="plan-features">
+                    <li><i class="fas fa-check"></i> Servicio de medición con el dispositivo AirSense en la ubicación del cliente</li>
+                    <li><i class="fas fa-check"></i> Informe con los datos obtenidos en las fechas de medición</li>
+                    <li><i class="fas fa-check"></i> Clasificación de calidad: Bueno / Moderado / Alto</li>
+                    <li><i class="fas fa-check"></i> Gráficas estadísticas de los datos recolectados</li>
+                    <li><i class="fas fa-check"></i> Medidas de tendencia a lo largo de las mediciones</li>
+                    <li><i class="fas fa-check"></i> Planes de mejora ambiental personalizados</li>
+                </ul>
+                <div class="plan-price">
+                    <div class="amount"><sup>$</sup>14.13</div>
+                    <div class="period">precio base del servicio</div>
+                </div>
+                <div class="plan-km">
+                    <i class="fas fa-route"></i>
+                    <span>+ $1.50 por cada kilómetro recorrido hasta la ubicación del cliente</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <img src="Airsense-logo.png" class="logotipo" alt="AirSense">
+            <p>Sistema de monitoreo de calidad del aire para Cuenca, Ecuador. Macroproyecto 2026.</p>
+            <div class="footer-social">
+                <a href="https://www.instagram.com/airsense_ricaurte/" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.facebook.com/profile.php?id=61586188710664" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            </div>
+        </div>
+        <div class="footer-links">
+            <h4>Páginas</h4>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="nosotros.html">Sobre Nosotros</a></li>
+                <li><a href="mediciones.html">Mediciones</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+            </ul>
+        </div>
+        <div class="footer-links">
+            <h4>Planes</h4>
+            <ul>
+                <li><a href="#planes">Básico</a></li>
+                <li><a href="#planes">Medium</a></li>
+                <li><a href="#planes">Premium</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        &copy; 2026 AirSense — Cuenca, Ecuador
+    </div>
+</footer>
+
 </body>
 </html>

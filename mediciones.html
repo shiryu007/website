@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mediciones | AirSense</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --teal-dark: #0b4d5e;
+            --teal-mid: #1a7a8a;
+            --teal-bright: #2bb5c8;
+            --teal-light: #7dd8e4;
+            --bg-light: #f0f9fb;
+            --text-dark: #0d2b33;
+            --text-mid: #3a6370;
+            --white: #ffffff;
+            --good: #22c55e;
+            --moderate: #f59e0b;
+            --unhealthy: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--text-dark); }
+
+        nav {
+            background: var(--teal-dark);
+            position: sticky; top: 0; z-index: 100;
+            padding: 0 2rem; height: 68px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 2px 20px rgba(11,77,94,0.4);
+        }
+        .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .nav-brand img.isotipo { height: 38px; mix-blend-mode: screen; }
+        .nav-brand img.logotipo { height: 26px; mix-blend-mode: screen; }
+        .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+        .nav-links a { color: rgba(255,255,255,0.8); text-decoration: none; font-family: 'Exo 2', sans-serif; font-size: 0.9rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; transition: color 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--teal-light); }
+        .nav-social { display: flex; align-items: center; gap: 1rem; }
+        .nav-social a { color: rgba(255,255,255,0.7); font-size: 1.1rem; transition: color 0.2s, transform 0.2s; text-decoration: none; }
+        .nav-social a:hover { color: var(--teal-light); transform: scale(1.15); }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal-mid) 100%);
+            padding: 5rem 2rem 4rem;
+            text-align: center;
+            position: relative; overflow: hidden;
+        }
+        .page-header::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .page-header h1 { font-family: 'Exo 2', sans-serif; font-size: clamp(2.2rem, 4vw, 3.5rem); font-weight: 900; color: var(--white); position: relative; margin-bottom: 1rem; }
+        .page-header p { color: rgba(255,255,255,0.75); font-size: 1.1rem; max-width: 540px; margin: 0 auto; position: relative; line-height: 1.7; }
+
+        .section { padding: 4rem 2rem; }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        .section-tag { font-family: 'Exo 2', sans-serif; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--teal-mid); margin-bottom: 0.75rem; }
+        .section-title { font-family: 'Exo 2', sans-serif; font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 800; color: var(--teal-dark); margin-bottom: 1rem; line-height: 1.2; }
+
+        /* LEGEND */
+        .legend-strip {
+            background: var(--bg-light);
+            border-bottom: 1px solid rgba(43,181,200,0.15);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-size: 0.85rem; font-weight: 500; color: var(--text-mid);
+        }
+
+        .legend-dot {
+            width: 12px; height: 12px; border-radius: 50%;
+        }
+
+        /* SUMMARY CARDS */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .summary-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 1.2rem;
+            border: 1px solid rgba(43,181,200,0.15);
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(43,181,200,0.12);
+        }
+
+        .summary-card .pt-label {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.65rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--text-mid); margin-bottom: 0.5rem;
+        }
+
+        .summary-card .pt-value {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.5rem; font-weight: 900;
+            color: var(--teal-dark);
+        }
+
+        .summary-card .pt-status {
+            font-size: 0.72rem; margin-top: 0.3rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            display: inline-block;
+            font-weight: 600;
+        }
+
+        .status-good { background: rgba(34,197,94,0.12); color: #16a34a; }
+        .status-moderate { background: rgba(245,158,11,0.12); color: #b45309; }
+        .status-unhealthy { background: rgba(239,68,68,0.12); color: #dc2626; }
+
+        /* MAP SECTION */
+        .map-section {
+            background: var(--bg-light);
+            padding: 3rem 2rem;
+        }
+
+        .map-wrapper {
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid rgba(43,181,200,0.2);
+            box-shadow: 0 6px 32px rgba(11,77,94,0.1);
+        }
+
+        .map-header {
+            background: var(--teal-dark);
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .map-header h3 {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.9rem; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--white);
+            display: flex; align-items: center; gap: 0.5rem;
+        }
+
+        .map-header .live-badge {
+            display: flex; align-items: center; gap: 0.4rem;
+            background: rgba(43,181,200,0.2);
+            border: 1px solid rgba(43,181,200,0.4);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem; color: var(--teal-light);
+            font-family: 'Exo 2', sans-serif; font-weight: 600;
+        }
+
+        .live-dot {
+            width: 7px; height: 7px; background: var(--teal-light);
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .map-wrapper iframe {
+            display: block;
+            width: 100%;
+            height: 480px;
+            border: none;
+        }
+
+        /* CHARTS */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .chart-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 1.8rem;
+            border: 1px solid rgba(43,181,200,0.12);
+            box-shadow: 0 2px 12px rgba(11,77,94,0.05);
+        }
+
+        .chart-card h4 {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.85rem; font-weight: 700;
+            letter-spacing: 0.08em; text-transform: uppercase;
+            color: var(--text-mid); margin-bottom: 1.2rem;
+        }
+
+        .chart-card canvas {
+            max-height: 260px;
+        }
+
+        .chart-card.full { grid-column: 1; }
+
+        /* TABLA */
+        .table-section { padding: 2rem 2rem 4rem; }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .data-table thead th {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.72rem; font-weight: 700;
+            letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--text-mid);
+            padding: 0.8rem 1rem;
+            text-align: left;
+            background: var(--bg-light);
+            border-bottom: 2px solid rgba(43,181,200,0.2);
+        }
+
+        .data-table tbody tr {
+            border-bottom: 1px solid rgba(43,181,200,0.08);
+            transition: background 0.15s;
+        }
+
+        .data-table tbody tr:hover { background: var(--bg-light); }
+
+        .data-table tbody td {
+            padding: 0.9rem 1rem;
+            color: var(--text-dark);
+        }
+
+        .badge {
+            padding: 0.25rem 0.6rem;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .badge-good { background: rgba(34,197,94,0.12); color: #16a34a; }
+        .badge-moderate { background: rgba(245,158,11,0.12); color: #b45309; }
+        .badge-unhealthy { background: rgba(239,68,68,0.12); color: #dc2626; }
+
+        /* FOOTER */
+        footer { background: var(--text-dark); color: rgba(255,255,255,0.7); padding: 3rem 2rem 1.5rem; }
+        .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; flex-wrap: wrap; }
+        .footer-brand img.logotipo { height: 22px; mix-blend-mode: screen; margin-bottom: 0.8rem; display: block; }
+        .footer-brand p { font-size: 0.85rem; max-width: 280px; line-height: 1.6; }
+        .footer-social { display: flex; gap: 1rem; margin-top: 1rem; }
+        .footer-social a { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.9rem; text-decoration: none; transition: border-color 0.2s, color 0.2s; }
+        .footer-social a:hover { border-color: var(--teal-bright); color: var(--teal-light); }
+        .footer-links h4 { font-family: 'Exo 2', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white); margin-bottom: 1rem; }
+        .footer-links ul { list-style: none; }
+        .footer-links ul li { margin-bottom: 0.5rem; }
+        .footer-links ul li a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        .footer-links ul li a:hover { color: var(--teal-light); }
+        .footer-bottom { max-width: 1100px; margin: 2rem auto 0; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); text-align: center; font-size: 0.8rem; }
+
+        @media (max-width: 900px) {
+            .summary-grid { grid-template-columns: repeat(3, 1fr); }
+            .charts-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+        }
+        @media (max-width: 500px) {
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html" class="nav-brand">
+        <img src="Airsense-iso.png" class="isotipo" alt="AirSense isotipo">
+        <img src="Airsense-logo.png" class="logotipo" alt="AirSense">
+    </a>
+    <ul class="nav-links">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="nosotros.html">Nosotros</a></li>
+        <li><a href="mediciones.html" class="active">Mediciones</a></li>
+        <li><a href="contacto.html">Contacto</a></li>
+    </ul>
+    <div class="nav-social">
+        <a href="https://www.instagram.com/airsense_ricaurte/" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.facebook.com/profile.php?id=61586188710664" target="_blank"><i class="fab fa-facebook-f"></i></a>
+    </div>
+</nav>
+
+<div class="page-header">
+    <h1>Mapa de Mediciones</h1>
+    <p>6 puntos de monitoreo activos en la parroquia Ricaurte, Cuenca. Datos de calidad del aire, tendencias y estadísticas en tiempo real.</p>
+</div>
+
+<!-- LEYENDA -->
+<div class="legend-strip">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--good);"></div> Bueno (&lt; 35)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--moderate);"></div> Moderado (35–55)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f97316;"></div> Poco saludable (55–80)</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--unhealthy);"></div> Alto (&gt; 80)</div>
+</div>
+
+<!-- FOTO DEL DISPOSITIVO EN CAMPO -->
+<section style="padding:0; background:var(--bg-light); border-bottom:1px solid rgba(43,181,200,0.12);">
+    <div style="max-width:1200px; margin:0 auto; display:grid; grid-template-columns:1fr 2fr; align-items:stretch;">
+        <div style="overflow:hidden; max-height:260px;">
+            <img src="device-closeup.png" alt="AirSense midiendo en Ricaurte" style="width:100%; height:100%; object-fit:cover; object-position:center; display:block;">
+        </div>
+        <div style="padding:2rem 2.5rem; display:flex; flex-direction:column; justify-content:center; gap:0.8rem;">
+            <p style="font-family:'Exo 2',sans-serif; font-size:0.72rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--teal-mid);">Dispositivo en campo</p>
+            <h3 style="font-family:'Exo 2',sans-serif; font-size:1.4rem; font-weight:800; color:var(--teal-dark); line-height:1.3;">AirSense midiendo en la parroquia Ricaurte</h3>
+            <p style="color:var(--text-mid); font-size:0.95rem; line-height:1.7;">El dispositivo opera de forma completamente autónoma con batería 18650 (2S). La carcasa impresa en 3D protege el Arduino UNO, la pantalla TFT y el sensor MQ-135, permitiendo mediciones en exteriores sin necesidad de conexión eléctrica.</p>
+        </div>
+    </div>
+</section>
+
+<!-- RESUMEN PUNTOS -->
+<section class="section" style="padding-bottom:2rem;">
+    <div class="container">
+        <p class="section-tag">Estado actual</p>
+        <h2 class="section-title">Resumen de los 6 puntos</h2>
+        <p style="color:var(--text-mid); margin-bottom:1.8rem; font-size:0.95rem;">Última lectura — <span id="lastUpdate"></span></p>
+
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="pt-label">4 Esquinas</div>
+                <div class="pt-value" id="val1">—</div>
+                <div class="pt-status status-good" id="st1">Bueno</div>
+            </div>
+            <div class="summary-card">
+                <div class="pt-label">Mcdo. 4 de Nov.</div>
+                <div class="pt-value" id="val2">—</div>
+                <div class="pt-status status-moderate" id="st2">Moderado</div>
+            </div>
+            <div class="summary-card">
+                <div class="pt-label">Av. 25 de Marzo</div>
+                <div class="pt-value" id="val3">—</div>
+                <div class="pt-status status-good" id="st3">Bueno</div>
+            </div>
+            <div class="summary-card">
+                <div class="pt-label">Bo. Los Cipreses</div>
+                <div class="pt-value" id="val4">—</div>
+                <div class="pt-status status-moderate" id="st4">Moderado</div>
+            </div>
+            <div class="summary-card">
+                <div class="pt-label">Pte. Machángara</div>
+                <div class="pt-value" id="val5">—</div>
+                <div class="pt-status status-unhealthy" id="st5">Alto</div>
+            </div>
+            <div class="summary-card">
+                <div class="pt-label">U.E. B. Esperanza</div>
+                <div class="pt-value" id="val6">—</div>
+                <div class="pt-status status-good" id="st6">Bueno</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- MAPA uMap -->
+<section class="map-section">
+    <div class="container">
+        <div class="map-wrapper">
+            <div class="map-header">
+                <h3><i class="fas fa-map-marked-alt"></i> Mapa interactivo — 6 puntos de medición</h3>
+                <div class="live-badge"><div class="live-dot"></div> En vivo</div>
+            </div>
+
+            <iframe
+                style="width: 100%; height: 480px; border: 0; display: block;"
+                allowfullscreen
+                allow="geolocation"
+                src="https://umap.openstreetmap.fr/es/map/airsense-mediciones_1392951?scaleControl=true&miniMap=false&scrollWheelZoom=true&zoomControl=true&editMode=disabled&moreControl=true&searchControl=null&tilelayersControl=null&embedControl=null&datalayersControl=true&onLoadPanel=none&captionBar=true&captionMenus=true&datalayers=49b386f3-49ae-45a3-a7a9-ddc06a2a12ed%2C23ddb2a7-813a-4b9a-b43f-bc8fd87eeb9d%2Cd0901549-61d1-42da-b620-009a423b0355%2C6c89ebe5-1019-4ea9-b740-e0afb9db87a9%2Cd7854ebf-e11c-48f8-9426-1ee62cd2b521%2C21a70fc8-a0e3-4225-bfda-c66db8424940#16/-2.866619/-78.967246">
+            </iframe>
+            <div style="background:var(--teal-dark); padding:0.6rem 1.2rem; text-align:right; border-top:1px solid rgba(255,255,255,0.08);">
+                <a href="https://umap.openstreetmap.fr/es/map/airsense-mediciones_1392951?scaleControl=true&miniMap=false&scrollWheelZoom=true&zoomControl=true&editMode=disabled&moreControl=true&searchControl=null&tilelayersControl=null&embedControl=null&datalayersControl=true&onLoadPanel=none&captionBar=true&captionMenus=true&datalayers=49b386f3-49ae-45a3-a7a9-ddc06a2a12ed%2C23ddb2a7-813a-4b9a-b43f-bc8fd87eeb9d%2Cd0901549-61d1-42da-b620-009a423b0355%2C6c89ebe5-1019-4ea9-b740-e0afb9db87a9%2Cd7854ebf-e11c-48f8-9426-1ee62cd2b521%2C21a70fc8-a0e3-4225-bfda-c66db8424940#16/-2.866619/-78.967246"
+                   target="_blank"
+                   style="color:var(--teal-light); font-family:'Exo 2',sans-serif; font-size:0.78rem; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; text-decoration:none;">
+                    <i class="fas fa-expand-alt" style="margin-right:0.4rem;"></i>Ver en pantalla completa
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- GRÁFICAS -->
+<section class="section">
+    <div class="container">
+        <p class="section-tag">Estadísticas</p>
+        <h2 class="section-title">Análisis de datos</h2>
+
+        <div class="charts-grid">
+            <div class="chart-card">
+                <h4><i class="fas fa-chart-line" style="color:var(--teal-bright); margin-right:0.4rem;"></i> Tendencia por punto — últimas 7 lecturas</h4>
+                <canvas id="trendChart"></canvas>
+            </div>
+            <div class="chart-card">
+                <h4><i class="fas fa-chart-pie" style="color:var(--teal-bright); margin-right:0.4rem;"></i> Distribución de calidad</h4>
+                <canvas id="donutChart"></canvas>
+            </div>
+        </div>
+
+        <div class="chart-card" style="margin-top:2rem;">
+            <h4><i class="fas fa-chart-bar" style="color:var(--teal-bright); margin-right:0.4rem;"></i> Comparativa entre puntos (valor promedio)</h4>
+            <canvas id="barChart" style="max-height:200px;"></canvas>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <img src="Airsense-logo.png" class="logotipo" alt="AirSense">
+            <p>Sistema de monitoreo de calidad del aire para Cuenca, Ecuador. Macroproyecto 2026.</p>
+            <div class="footer-social">
+                <a href="https://www.instagram.com/airsense_ricaurte/" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.facebook.com/profile.php?id=61586188710664" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            </div>
+        </div>
+        <div class="footer-links">
+            <h4>Páginas</h4>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="nosotros.html">Sobre Nosotros</a></li>
+                <li><a href="mediciones.html">Mediciones</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 AirSense — Cuenca, Ecuador</div>
+</footer>
+
+<script>
+    // Datos de demo — reemplaza con tus datos reales
+    const puntos = [
+        { id: 1, name: 'Punto 1', location: 'Sector 4 Esquinas',                                          value: 28, trend: '↓ BAJANDO' },
+        { id: 2, name: 'Punto 2', location: 'Mercado 4 de Noviembre',                                     value: 47, trend: '→ ESTABLE' },
+        { id: 3, name: 'Punto 3', location: 'Av. 25 de Marzo y Calle Eduardo Cárdenas',                   value: 22, trend: '↓ BAJANDO' },
+        { id: 4, name: 'Punto 4', location: 'Barrio Los Cipreses: Vía Bo. El Progreso y Calle S/N',       value: 51, trend: '↑ SUBIENDO' },
+        { id: 5, name: 'Punto 5', location: 'Puente Machángara: Av. 25 de Marzo y Av. de los Migrantes',  value: 83, trend: '↑ SUBIENDO' },
+        { id: 6, name: 'Punto 6', location: 'U.E. Buena Esperanza: Calle Julia Bernal y Calle Juan Pablo II', value: 19, trend: '→ ESTABLE' },
+    ];
+
+    function getStatus(v) {
+        if (v < 35) return { label: 'Bueno', cls: 'badge-good', color: '#22c55e' };
+        if (v < 55) return { label: 'Moderado', cls: 'badge-moderate', color: '#f59e0b' };
+        if (v < 80) return { label: 'Poco saludable', cls: 'badge-moderate', color: '#f97316' };
+        return { label: 'Alto', cls: 'badge-unhealthy', color: '#ef4444' };
+    }
+
+    // Summary cards
+    const now = new Date();
+    document.getElementById('lastUpdate').textContent = now.toLocaleString('es-EC');
+
+    puntos.forEach(p => {
+        const s = getStatus(p.value);
+        document.getElementById('val' + p.id).textContent = p.value;
+        const stEl = document.getElementById('st' + p.id);
+        stEl.textContent = s.label;
+        stEl.className = 'pt-status ' + (p.value < 35 ? 'status-good' : p.value < 80 ? 'status-moderate' : 'status-unhealthy');
+    });
+
+    // Colores chart
+    const colors = puntos.map(p => getStatus(p.value).color);
+    const tealShades = ['#0b4d5e','#1a7a8a','#2bb5c8','#7dd8e4','#a8e9f0','#c8f2f7'];
+
+    // Trend chart — datos históricos simulados
+    const labels = ['L-1','L-2','L-3','L-4','L-5','L-6','Ahora'];
+    const trendCtx = document.getElementById('trendChart').getContext('2d');
+    new Chart(trendCtx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: puntos.map((p, i) => ({
+                label: p.name,
+                data: Array.from({length: 7}, () => Math.max(5, p.value + Math.round((Math.random()-0.5)*20))).concat([p.value]),
+                borderColor: tealShades[i],
+                backgroundColor: tealShades[i] + '22',
+                tension: 0.4,
+                pointRadius: 3,
+                borderWidth: 2,
+            }))
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'bottom', labels: { font: { family: 'DM Sans' }, boxWidth: 12 } } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+
+    // Donut chart
+    const catCounts = [0,0,0,0];
+    puntos.forEach(p => {
+        if (p.value < 35) catCounts[0]++;
+        else if (p.value < 55) catCounts[1]++;
+        else if (p.value < 80) catCounts[2]++;
+        else catCounts[3]++;
+    });
+    const donutCtx = document.getElementById('donutChart').getContext('2d');
+    new Chart(donutCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Bueno','Moderado','Poco saludable','Alto'],
+            datasets: [{ data: catCounts, backgroundColor: ['#22c55e','#f59e0b','#f97316','#ef4444'], borderWidth: 0 }]
+        },
+        options: {
+            responsive: true,
+            cutout: '65%',
+            plugins: { legend: { position: 'bottom', labels: { font: { family: 'DM Sans' }, boxWidth: 12 } } }
+        }
+    });
+
+    // Bar chart
+    const barCtx = document.getElementById('barChart').getContext('2d');
+    new Chart(barCtx, {
+        type: 'bar',
+        data: {
+            labels: puntos.map(p => p.name + '\n' + p.location),
+            datasets: [{
+                label: 'Valor promedio (raw)',
+                data: puntos.map(p => p.value),
+                backgroundColor: colors,
+                borderRadius: 6,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

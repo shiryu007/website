@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre Nosotros | AirSense</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;600;700;900&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --teal-dark: #0b4d5e;
+            --teal-mid: #1a7a8a;
+            --teal-bright: #2bb5c8;
+            --teal-light: #7dd8e4;
+            --bg-light: #f0f9fb;
+            --text-dark: #0d2b33;
+            --text-mid: #3a6370;
+            --white: #ffffff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'DM Sans', sans-serif; background: var(--white); color: var(--text-dark); }
+
+        nav {
+            background: var(--teal-dark);
+            position: sticky; top: 0; z-index: 100;
+            padding: 0 2rem; height: 68px;
+            display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 2px 20px rgba(11,77,94,0.4);
+        }
+        .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+        .nav-brand img.isotipo { height: 38px; mix-blend-mode: screen; }
+        .nav-brand img.logotipo { height: 26px; mix-blend-mode: screen; }
+        .nav-links { display: flex; align-items: center; gap: 2rem; list-style: none; }
+        .nav-links a { color: rgba(255,255,255,0.8); text-decoration: none; font-family: 'Exo 2', sans-serif; font-size: 0.9rem; font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; transition: color 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--teal-light); }
+        .nav-social { display: flex; align-items: center; gap: 1rem; }
+        .nav-social a { color: rgba(255,255,255,0.7); font-size: 1.1rem; transition: color 0.2s, transform 0.2s; text-decoration: none; }
+        .nav-social a:hover { color: var(--teal-light); transform: scale(1.15); }
+
+        /* PAGE HEADER */
+        .page-header {
+            background: linear-gradient(135deg, var(--teal-dark) 0%, var(--teal-mid) 100%);
+            padding: 5rem 2rem 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .page-header::before {
+            content: '';
+            position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+        .page-header h1 {
+            font-family: 'Exo 2', sans-serif;
+            font-size: clamp(2.2rem, 4vw, 3.5rem);
+            font-weight: 900;
+            color: var(--white);
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        .page-header p {
+            color: rgba(255,255,255,0.75);
+            font-size: 1.1rem;
+            max-width: 540px;
+            margin: 0 auto;
+            position: relative;
+            line-height: 1.7;
+        }
+
+        .section { padding: 5rem 2rem; }
+        .container { max-width: 1100px; margin: 0 auto; }
+
+        .section-tag {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            color: var(--teal-mid); margin-bottom: 0.75rem;
+        }
+        .section-title {
+            font-family: 'Exo 2', sans-serif;
+            font-size: clamp(1.8rem, 3vw, 2.5rem);
+            font-weight: 800; color: var(--teal-dark);
+            margin-bottom: 1.5rem; line-height: 1.2;
+        }
+
+        /* MISION / VISION */
+        .mv-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .mv-card {
+            background: var(--bg-light);
+            border-radius: 16px;
+            padding: 2.5rem;
+            border-top: 4px solid var(--teal-bright);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .mv-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(43,181,200,0.12);
+        }
+
+        .mv-card .icon {
+            width: 54px; height: 54px;
+            background: rgba(43,181,200,0.15);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.4rem; color: var(--teal-mid);
+            margin-bottom: 1.5rem;
+        }
+
+        .mv-card h3 {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.4rem; font-weight: 800;
+            color: var(--teal-dark); margin-bottom: 1rem;
+        }
+
+        .mv-card p {
+            color: var(--text-mid);
+            line-height: 1.8; font-size: 1rem;
+        }
+
+        /* HISTORIA */
+        .historia-section {
+            background: var(--teal-dark);
+            padding: 5rem 2rem;
+        }
+
+        .historia-section .section-tag { color: var(--teal-light); }
+        .historia-section .section-title { color: var(--white); }
+
+        .timeline {
+            position: relative;
+            margin-top: 3rem;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 28px;
+            top: 0; bottom: 0;
+            width: 2px;
+            background: rgba(43,181,200,0.3);
+        }
+
+        .timeline-item {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 2.5rem;
+            position: relative;
+        }
+
+        .timeline-dot {
+            width: 58px;
+            flex-shrink: 0;
+            display: flex;
+            justify-content: center;
+            padding-top: 0.2rem;
+        }
+
+        .timeline-dot span {
+            width: 18px; height: 18px;
+            background: var(--teal-bright);
+            border-radius: 50%;
+            border: 3px solid var(--teal-dark);
+            box-shadow: 0 0 0 2px var(--teal-bright);
+            flex-shrink: 0;
+        }
+
+        .timeline-content {
+            background: rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            border: 1px solid rgba(255,255,255,0.1);
+            flex: 1;
+            transition: background 0.2s;
+        }
+
+        .timeline-content:hover {
+            background: rgba(43,181,200,0.1);
+        }
+
+        .timeline-content .year {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--teal-light);
+            margin-bottom: 0.4rem;
+        }
+
+        .timeline-content h4 {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-content p {
+            color: rgba(255,255,255,0.65);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        /* EQUIPO */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .team-card {
+            background: var(--bg-light);
+            border-radius: 14px;
+            padding: 2rem;
+            text-align: center;
+            border: 1px solid rgba(43,181,200,0.15);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .team-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(43,181,200,0.12);
+        }
+
+        .team-avatar {
+            width: 70px; height: 70px;
+            background: linear-gradient(135deg, var(--teal-mid), var(--teal-bright));
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1.6rem; font-weight: 800; color: var(--white);
+            margin: 0 auto 1rem;
+        }
+
+        .team-card h4 {
+            font-family: 'Exo 2', sans-serif;
+            font-size: 1rem; font-weight: 700;
+            color: var(--teal-dark); margin-bottom: 0.3rem;
+        }
+
+        .team-card p {
+            font-size: 0.85rem; color: var(--text-mid);
+        }
+
+        /* FOOTER */
+        footer {
+            background: var(--text-dark);
+            color: rgba(255,255,255,0.7);
+            padding: 3rem 2rem 1.5rem;
+        }
+        .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; justify-content: space-between; align-items: flex-start; gap: 2rem; flex-wrap: wrap; }
+        .footer-brand img.logotipo { height: 22px; mix-blend-mode: screen; margin-bottom: 0.8rem; display: block; }
+        .footer-brand p { font-size: 0.85rem; max-width: 280px; line-height: 1.6; }
+        .footer-social { display: flex; gap: 1rem; margin-top: 1rem; }
+        .footer-social a { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.2); display: flex; align-items: center; justify-content: center; color: rgba(255,255,255,0.6); font-size: 0.9rem; text-decoration: none; transition: border-color 0.2s, color 0.2s; }
+        .footer-social a:hover { border-color: var(--teal-bright); color: var(--teal-light); }
+        .footer-links h4 { font-family: 'Exo 2', sans-serif; font-size: 0.8rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--white); margin-bottom: 1rem; }
+        .footer-links ul { list-style: none; }
+        .footer-links ul li { margin-bottom: 0.5rem; }
+        .footer-links ul li a { color: rgba(255,255,255,0.6); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+        .footer-links ul li a:hover { color: var(--teal-light); }
+        .footer-bottom { max-width: 1100px; margin: 2rem auto 0; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.08); text-align: center; font-size: 0.8rem; }
+
+        @media (max-width: 768px) {
+            .mv-grid, .team-grid { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="index.html" class="nav-brand">
+        <img src="Airsense-iso.png" class="isotipo" alt="AirSense isotipo">
+        <img src="Airsense-logo.png" class="logotipo" alt="AirSense">
+    </a>
+    <ul class="nav-links">
+        <li><a href="index.html">Inicio</a></li>
+        <li><a href="nosotros.html" class="active">Nosotros</a></li>
+        <li><a href="mediciones.html">Mediciones</a></li>
+        <li><a href="contacto.html">Contacto</a></li>
+    </ul>
+    <div class="nav-social">
+        <a href="https://www.instagram.com/airsense_ricaurte/" target="_blank"><i class="fab fa-instagram"></i></a>
+        <a href="https://www.facebook.com/profile.php?id=61586188710664" target="_blank"><i class="fab fa-facebook-f"></i></a>
+    </div>
+</nav>
+
+<div class="page-header">
+    <h1>Sobre AirSense</h1>
+    <p>Grupo 4 · 2do Informática A · Macroproyecto 2026 — Dispositivo de monitoreo de calidad del aire en tiempo real en la parroquia Ricaurte.</p>
+</div>
+
+<!-- MISIÓN Y VISIÓN -->
+<section class="section">
+    <div class="container">
+        <p class="section-tag">Fundamentos</p>
+        <h2 class="section-title">Misión y Visión</h2>
+        <div class="mv-grid">
+            <div class="mv-card">
+                <div class="icon"><i class="fas fa-bullseye"></i></div>
+                <h3>Misión</h3>
+                <p>AirSense es un dispositivo diseñado con el objetivo de medir la calidad del aire de manera sencilla y accesible, con el fin de obtener información real e informar a la comunidad afectada sobre los niveles de contaminación, concientizar sobre el cuidado del medio ambiente para tomar medidas correctivas.</p>
+            </div>
+            <div class="mv-card">
+                <div class="icon"><i class="fas fa-eye"></i></div>
+                <h3>Visión</h3>
+                <p>Que AirSense sea parte de un proyecto educativo que contribuya a la concientización ambiental, para proteger la salud y mejorar la calidad de vida de la comunidad y futuras generaciones, promoviendo el uso de la tecnología como herramienta de transformación social.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- HISTORIA -->
+<section class="historia-section">
+    <div class="container">
+        <p class="section-tag">Historia y Antecedentes</p>
+        <h2 class="section-title">De una idea a un sistema real</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-dot"><span></span></div>
+                <div class="timeline-content">
+                    <div class="year">Fase 1 — Planificación y Adquisición</div>
+                    <h4>Identificación del problema en Ricaurte</h4>
+                    <p>En Ricaurte se observaron altos niveles de humo por quemas agrícolas, alto tráfico vehicular y actividades industriales. Sin embargo, no existían dispositivos accesibles que permitieran a la comunidad medir gases contaminantes como CO₂, óxidos de nitrógeno, NH₃, benceno y humo en tiempo real, lo que motivó el inicio del proyecto.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"><span></span></div>
+                <div class="timeline-content">
+                    <div class="year">Fase 2 — Armado electrónico</div>
+                    <h4>Diseño del circuito y pruebas en protoboard</h4>
+                    <p>Se planificó la conexión entre el sensor MQ-135, la pantalla TFT Shield y el Arduino UNO utilizando Fritzing. Se definió el uso de pin A5 para el sensor. Antes del montaje final, se realizaron pruebas en protoboard para verificar el funcionamiento y evitar errores en el circuito.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"><span></span></div>
+                <div class="timeline-content">
+                    <div class="year">Fase 3 — Carcasa de impresión 3D</div>
+                    <h4>Diseño en TinkerCAD e impresión 3D de la carcasa</h4>
+                    <p>Se diseñó digitalmente la carcasa en TinkerCAD tomando en cuenta las dimensiones reales de cada componente. El diseño fue impreso exitosamente en 3D, creando una estructura protectora para el circuito que permite el uso práctico del dispositivo en exteriores.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"><span></span></div>
+                <div class="timeline-content">
+                    <div class="year">Fase 4 y 5 — Mediciones y Análisis</div>
+                    <h4>Toma de datos, estadísticas y análisis de resultados</h4>
+                    <p>Se realizaron mediciones en múltiples sectores de la parroquia Ricaurte a distintos horarios y días. Los datos recolectados se registraron, organizaron y analizaron con el objetivo de identificar zonas con mayor nivel de contaminación mediante cuadros estadísticos y gráficas comparativas.</p>
+                </div>
+            </div>
+            <div class="timeline-item">
+                <div class="timeline-dot"><span></span></div>
+                <div class="timeline-content">
+                    <div class="year">Fase 6 — Estrategias de mejora</div>
+                    <h4>Planes de acción para reducir la contaminación</h4>
+                    <p>Con los datos de campo se señalaron los puntos con mayor nivel de contaminación. Esta información abre la puerta a campañas de concienciación, charlas formativas, infografías y acciones comunitarias en colegios, hogares y barrios, con el objetivo de impulsar buenas prácticas ambientales.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- EQUIPO -->
+<section class="section">
+    <div class="container">
+        <p class="section-tag">El equipo</p>
+        <h2 class="section-title">Quiénes somos</h2>
+        <div class="team-grid" style="grid-template-columns: repeat(3, 1fr);">
+            <div class="team-card">
+                <div class="team-avatar">CB</div>
+                <h4>Christopher Barros</h4>
+                <p>Líder · Branding, Marco Teórico, Carcasa 3D, Conclusiones</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">SH</div>
+                <h4>Scarlet Hernández</h4>
+                <p>Logotipo & Isotipo, Armado Electrónico, Impacto ambiental</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">MP</div>
+                <h4>Michael Pozo</h4>
+                <p>Marco Teórico, Diseño de cartel Open House, Planes de mejora</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">ER</div>
+                <h4>Evan Rendón</h4>
+                <p>Diagrama de Gantt, Marco Teórico, Página Web, Esquema de resultados</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">JF</div>
+                <h4>Jostin Fernández</h4>
+                <p>YouTube, SEO On-Page & Off-Page, Cuadros Estadísticos</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">AN</div>
+                <h4>Ariel Niola</h4>
+                <p>Instagram, Análisis de resultados de medición</p>
+            </div>
+        </div>
+        <p style="margin-top:1rem; color:var(--text-mid); font-size:0.85rem; font-style:italic;">* 2do Informática A — Macroproyecto 2026, Unidad Educativa, Cuenca, Ecuador.</p>
+    </div>
+</section>
+
+<!-- GALERÍA -->
+<section style="background:var(--teal-dark); padding:4rem 2rem;">
+    <div style="max-width:1100px; margin:0 auto;">
+        <p style="font-family:'Exo 2',sans-serif; font-size:0.75rem; font-weight:700; letter-spacing:0.15em; text-transform:uppercase; color:var(--teal-light); margin-bottom:0.75rem;">El dispositivo</p>
+        <h2 style="font-family:'Exo 2',sans-serif; font-size:clamp(1.8rem,3vw,2.5rem); font-weight:800; color:var(--white); margin-bottom:2.5rem; line-height:1.2;">AirSense en acción</h2>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1.2rem;">
+            <div style="border-radius:14px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.35); position:relative; aspect-ratio:3/4;">
+                <img src="device-hand.png" alt="Dispositivo AirSense - carcasa 3D" style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(11,77,94,0.9)); padding:1rem 1.2rem;">
+                    <span style="font-family:'Exo 2',sans-serif; font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--teal-light);">Prototipo final</span>
+                    <p style="color:rgba(255,255,255,0.85); font-size:0.85rem; margin-top:0.2rem;">Carcasa impresa en 3D — lectura BUENO 24</p>
+                </div>
+            </div>
+            <div style="border-radius:14px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.35); position:relative; aspect-ratio:3/4;">
+                <img src="device-outdoor.png" alt="AirSense midiendo en Ricaurte" style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(11,77,94,0.9)); padding:1rem 1.2rem;">
+                    <span style="font-family:'Exo 2',sans-serif; font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--teal-light);">Medición en campo</span>
+                    <p style="color:rgba(255,255,255,0.85); font-size:0.85rem; margin-top:0.2rem;">Parroquia Ricaurte, Cuenca — lectura BUENO 21</p>
+                </div>
+            </div>
+            <div style="border-radius:14px; overflow:hidden; box-shadow:0 8px 30px rgba(0,0,0,0.35); position:relative; aspect-ratio:3/4;">
+                <img src="20260305_115347.jpg" alt="Prototipo en protoboard" style="width:100%; height:100%; object-fit:cover; display:block; transition:transform 0.4s;" onmouseover="this.style.transform='scale(1.04)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent,rgba(11,77,94,0.9)); padding:1rem 1.2rem;">
+                    <span style="font-family:'Exo 2',sans-serif; font-size:0.75rem; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; color:var(--teal-light);">Fase de desarrollo</span>
+                    <p style="color:rgba(255,255,255,0.85); font-size:0.85rem; margin-top:0.2rem;">Arduino UNO + pantalla TFT + sensor MQ-135</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-brand">
+            <img src="Airsense-logo.png" class="logotipo" alt="AirSense">
+            <p>Sistema de monitoreo de calidad del aire para Cuenca, Ecuador. Macroproyecto 2026.</p>
+            <div class="footer-social">
+                <a href="https://www.instagram.com/airsense_ricaurte/" target="_blank"><i class="fab fa-instagram"></i></a>
+                <a href="https://www.facebook.com/profile.php?id=61586188710664" target="_blank"><i class="fab fa-facebook-f"></i></a>
+            </div>
+        </div>
+        <div class="footer-links">
+            <h4>Páginas</h4>
+            <ul>
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="nosotros.html">Sobre Nosotros</a></li>
+                <li><a href="mediciones.html">Mediciones</a></li>
+                <li><a href="contacto.html">Contacto</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 AirSense — Cuenca, Ecuador</div>
+</footer>
+
+</body>
+</html>
