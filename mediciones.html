@@ -412,7 +412,7 @@
 
         <div class="charts-grid">
             <div class="chart-card">
-                <h4><i class="fas fa-chart-line" style="color:var(--teal-bright); margin-right:0.4rem;"></i> Promedio por sesión de medición — 6 puntos</h4>
+                <h4><i class="fas fa-chart-bar" style="color:var(--teal-bright); margin-right:0.4rem;"></i> Promedio por punto — 3 semanas de medición</h4>
                 <canvas id="trendChart"></canvas>
             </div>
             <div class="chart-card">
@@ -496,37 +496,60 @@
     // ── Colores por punto ──
     const ptColors = ['#0b4d5e','#2bb5c8','#f59e0b','#7dd8e4','#22c55e','#f97316'];
 
-    // ── Gráfica 1: Tendencia por punto — valores promedio por sesión ──
-    const sessionLabels = ['Sesión 1','Sesión 2','Sesión 3','Sesión 4','Sesión 5','Sesión 6','Sesión 7'];
+    // ── Gráfica 1: Promedio por punto — 3 semanas de medición ──
+    // Actualiza las fechas con las tuyas cuando las tengas
+    const semanas = ['Semana 1\n(23/03 – 29/03)', 'Semana 2\n(30/03 – 05/04)', 'Semana 3\n(06/04 – 12/04)'];
+
+    // Promedios por punto por semana — actualiza con tus valores reales
+    const promediosSemana = [
+        { name: '4 Esquinas',        color: ptColors[0], data: [21, 21, 20] },
+        { name: 'Bo. Los Cipreses',  color: ptColors[1], data: [20, 20, 19] },
+        { name: 'Av. 25 de Marzo',   color: ptColors[2], data: [21, 21, 22] },
+        { name: 'Mcdo. 4 de Nov.',   color: ptColors[3], data: [20, 20, 20] },
+        { name: 'Río Machángara',    color: ptColors[4], data: [19, 19, 18] },
+        { name: 'U.E. B. Esperanza', color: ptColors[5], data: [21, 22, 21] },
+    ];
+
     const trendCtx = document.getElementById('trendChart').getContext('2d');
     new Chart(trendCtx, {
-        type: 'line',
+        type: 'bar',
         data: {
-            labels: sessionLabels,
-            datasets: puntos.map((p, i) => ({
-                label: p.name + ' — ' + p.location,
-                data: p.history,
-                borderColor: ptColors[i],
-                backgroundColor: ptColors[i] + '18',
-                tension: 0.4,
-                pointRadius: 4,
-                pointHoverRadius: 6,
-                borderWidth: 2.5,
+            labels: semanas,
+            datasets: promediosSemana.map(p => ({
+                label: p.name,
+                data: p.data,
+                backgroundColor: p.color + 'cc',
+                borderColor: p.color,
+                borderWidth: 1.5,
+                borderRadius: 4,
+                borderSkipped: false,
             }))
         },
         options: {
             responsive: true,
             plugins: {
-                legend: { position: 'bottom', labels: { font: { family: 'DM Sans', size: 11 }, boxWidth: 14, padding: 16 } },
-                tooltip: { mode: 'index', intersect: false }
+                legend: {
+                    position: 'bottom',
+                    labels: { font: { family: 'DM Sans', size: 11 }, boxWidth: 14, padding: 14 }
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        footer: items => {
+                            const avg = (items.reduce((s, i) => s + i.raw, 0) / items.length).toFixed(1);
+                            return 'Promedio general: ' + avg;
+                        }
+                    }
+                }
             },
             scales: {
                 y: {
-                    min: 14, max: 32,
+                    min: 14, max: 28,
                     grid: { color: 'rgba(0,0,0,0.05)' },
-                    title: { display: true, text: 'Valor (raw MQ-135)', font: { family: 'DM Sans', size: 11 }, color: '#3a6370' }
+                    title: { display: true, text: 'Promedio de medición (raw)', font: { family: 'DM Sans', size: 11 }, color: '#3a6370' }
                 },
-                x: { grid: { display: false } }
+                x: { grid: { display: false }, ticks: { font: { family: 'DM Sans', size: 11 } } }
             }
         }
     });
